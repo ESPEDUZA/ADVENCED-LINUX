@@ -4,3 +4,9 @@ services:
     build: .
     ports:
       - "3008:80"
+  dev:
+    build:
+      context: ./dev
+    volumes:
+      - ./dev:/ansible:ro
+    command: ["sh", "-c", "ansible-playbook /ansible/playbook.yml && tail -f /dev/null"]

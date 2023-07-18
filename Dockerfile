@@ -1,5 +1,5 @@
 # Utilisation d'une image Node.js pour construire l'application
-FROM node:18
+FROM node:18-alpine
 # Création du répertoire de l'application
 WORKDIR /usr/src/app
 # Copie des fichiers package.json et package-lock.json pour installer les dépendances de l'application

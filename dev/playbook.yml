@@ -1,0 +1,58 @@
+- name: Setup development environment
+  hosts: localhost
+  gather_facts: False
+  tasks:
+    - name: Update apt and install necessary packages
+      apt:
+        update_cache: yes
+        name:
+          - fish
+          - tmux
+          - git
+          - curl
+          - gnupg
+          - build-essential
+
+    - name: Install Node.js
+      shell: |
+        curl -sL https://deb.nodesource.com/setup_14.x | bash -
+        apt-get install -y nodejs
+
+    - name: Install Yarn package manager
+      shell: |
+        curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
+        echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
+        apt update
+        apt install yarn
+
+    - name: Install fish plugin manager
+      shell: |
+        curl -Lo ~/.config/fish/functions/fisher.fish --create-dirs https://git.io/fisher
+
+    - name: Install fish plugins
+      shell: |
+        fish -c "fisher install jorgebucaran/nvm.fish"
+        fish -c "fisher install jethrokuan/z"
+
+    - name: Clone Tmux Plugin Manager if not already present
+      shell: |
+        if [ ! -d ~/.tmux/plugins/tpm ]; then
+          git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+        fi
+
+    - name: Configure tmux plugins
+      shell: |
+        echo "set -g @plugin 'tmux-plugins/tmux-sensible'" >> ~/.tmux.conf
+        echo "set -g @plugin 'tmux-plugins/tmux-resurrect'" >> ~/.tmux.conf
+        echo "run-shell '~/.tmux/plugins/tpm/tpm'" >> ~/.tmux.conf
+
+    - name: Install tmux plugins
+      shell: |
+        tmux start-server
+        tmux new-session -d
+        ~/.tmux/plugins/tpm/bin/install_plugins
+
+    - name: Install project dependencies
+      shell: |
+        cd ../dev
+        yarn install
